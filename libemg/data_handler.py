@@ -609,12 +609,14 @@ class OnlineDataHandler(DataHandler):
                 timestamp = datetime.now()
                 if self.options['std_out']:
                     print(str(data) + " " + str(timestamp))  
+                if self.options['emg_arr']:
+                    raw_data.add_emg(data)
+                    raw_data.add_emg2(data)
                 if self.options['file']:
                     with open(self.options['file_path'], 'a', newline='') as file:
                         writer = csv.writer(file)
+                        data.insert(0, time.time())
                         writer.writerow(data)
-                if self.options['emg_arr']:
-                    raw_data.add_emg(data)
 
     def _check_streaming(self, timeout=10):
         wt = time.time()

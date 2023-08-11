@@ -509,7 +509,7 @@ class OnlineEMGClassifier:
         print("Total Number of Predictions: " + str(len(times) + 1))
         self.stop_running()
     
-    def _run_helper(self):
+    def _run_helper(self, v=None):
         fe = FeatureExtractor()
         self.raw_data.reset_emg()
         while True:
@@ -520,7 +520,10 @@ class OnlineEMGClassifier:
 
                 # Dealing with the case for CNNs when no features are used
                 if self.features:
-                    features = fe.extract_features(self.features, window, self.classifier.feature_params)
+                    try:
+                        features = fe.extract_features(self.features, window, self.classifier.feature_params)
+                    except:
+                        print("ERROR: Extracting features.")
                     # If extracted features has an error - give error message
                     if (fe.check_features(features) != 0):
                         self.raw_data.adjust_increment(self.window_size, self.window_increment)
@@ -552,6 +555,8 @@ class OnlineEMGClassifier:
                     if prediction >= 0:
                         calculated_velocity = " " + str(self.classifier._get_velocity(window, prediction))
                 
+                if v is not None and not v.value:
+                    continue
                 # Write classifier output:
                 if not self.tcp:
                     self.sock.sendto(bytes(str(str(prediction) + calculated_velocity), "utf-8"), (self.ip, self.port))
